@@ -187,6 +187,7 @@ export async function createBooking(newBooking) {
 // UPDATE
 
 // The updatedFields is an object which should ONLY contain the updated data
+// We dont use it this fn anywhere. Instead we copy inside the fn and use it in the Server Action updateGuestAction
 export async function updateGuest(id, updatedFields) {
   const { data, error } = await supabase
     .from("guests")
@@ -219,7 +220,7 @@ export async function updateBooking(id, updatedFields) {
 
 /////////////
 // DELETE
-
+// We dont use it this fn anywhere. Instead we copy inside the fn and use it in the Server Action deleteReservationAction
 export async function deleteBooking(id) {
   const { data, error } = await supabase.from("bookings").delete().eq("id", id);
 
