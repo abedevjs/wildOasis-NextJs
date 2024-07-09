@@ -1,4 +1,4 @@
-//!Watch Google Developer Console guide by jonas on video 471
+//!Watch Google Developer Console guide by jonas on video 471 'Setting Up NextAuth'
 //https://authjs.dev/getting-started/providers/google
 
 import NextAuth from "next-auth"; //It is a third party library for Authentication for Next.js

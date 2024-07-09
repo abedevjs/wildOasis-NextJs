@@ -203,6 +203,7 @@ export async function updateGuest(id, updatedFields) {
   return data;
 }
 
+// We dont use it this fn anywhere. Instead we copy inside the fn and use it in the Server Action updateReservationAction
 export async function updateBooking(id, updatedFields) {
   const { data, error } = await supabase
     .from("bookings")

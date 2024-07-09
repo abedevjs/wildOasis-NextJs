@@ -1,27 +1,36 @@
 "use client";
 
-import { isWithinInterval } from "date-fns";
+import {
+  differenceInDays,
+  isPast,
+  isSameDay,
+  isWithinInterval,
+} from "date-fns";
 import { DayPicker } from "react-day-picker";
 import "react-day-picker/dist/style.css";
 import { useReservation } from "../_contexts/ReservationContext";
 
+// For explaining the logic below watch video 488 'Back to the Cabin Page', start from minute 09:30
 function isAlreadyBooked(range, datesArr) {
   return (
-    range.from &&
-    range.to &&
+    range?.from &&
+    range?.to &&
     datesArr.some((date) =>
-      isWithinInterval(date, { start: range.from, end: range.to })
+      isWithinInterval(date, { start: range?.from, end: range?.to })
     )
   );
 }
 
 function DateSelector({ cabin, settings, bookedDates }) {
   const { range, setRange, resetRange } = useReservation();
-  // CHANGE
-  const regularPrice = 23;
-  const discount = 23;
-  const numNights = 23;
-  const cabinPrice = 23;
+
+  // This variable will gray out the dates that can't be booked because is already booked in the bookedDates array
+  // For explaining the logic below watch video 488 'Back to the Cabin Page', start from minute 08:00
+  const displayRange = isAlreadyBooked(range, bookedDates) ? {} : range;
+
+  const { regularPrice, discount } = cabin;
+  const numNights = differenceInDays(displayRange?.to, displayRange?.from);
+  const cabinPrice = numNights * (regularPrice - discount);
 
   // SETTINGS
   const { minBookingLength, maxBookingLength } = settings;
@@ -32,7 +41,7 @@ function DateSelector({ cabin, settings, bookedDates }) {
         className="pt-12 place-self-center"
         mode="range"
         onSelect={setRange}
-        selected={range}
+        selected={displayRange}
         min={minBookingLength + 1}
         max={maxBookingLength}
         fromMonth={new Date()}
@@ -40,6 +49,14 @@ function DateSelector({ cabin, settings, bookedDates }) {
         toYear={new Date().getFullYear() + 5}
         captionLayout="dropdown"
         numberOfMonths={2}
+        // This disabled props return boolean
+        // For explaining the logic below watch video 488, start from minute 4:30
+        disabled={(todayDate) =>
+          isPast(todayDate) ||
+          bookedDates.some((alsoTodayDate) =>
+            isSameDay(alsoTodayDate, todayDate)
+          )
+        }
       />
 
       <div className="flex items-center justify-between px-8 bg-accent-500 text-primary-800 h-[72px]">
@@ -70,7 +87,7 @@ function DateSelector({ cabin, settings, bookedDates }) {
           ) : null}
         </div>
 
-        {range.from || range.to ? (
+        {range?.from || range?.to ? (
           <button
             className="border border-primary-800 py-2 px-4 text-sm font-semibold"
             onClick={resetRange}

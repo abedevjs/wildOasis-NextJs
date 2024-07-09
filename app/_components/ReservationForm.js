@@ -1,10 +1,40 @@
 "use client";
 
+import { differenceInDays } from "date-fns";
 import { useReservation } from "../_contexts/ReservationContext";
+import { createReservationAction } from "../_lib/actions";
+import SubmitButton from "./SubmitButton";
 
 function ReservationForm({ cabin, user }) {
-  const { range } = useReservation();
-  const { maxCapacity } = cabin;
+  const {
+    range: { from: startDate, to: endDate },
+    resetRange,
+  } = useReservation();
+  const { maxCapacity, regularPrice, discount, id: cabinId } = cabin;
+  const numNights = differenceInDays(endDate, startDate);
+  const cabinPrice = numNights * (regularPrice - discount);
+
+  const reservationData = {
+    startDate,
+    endDate,
+    numNights,
+    cabinPrice,
+    cabinId,
+  };
+
+  const abe =
+    "this abe variable will not be read if passed on the server action argument";
+
+  // Watch explanation of the bind method on video 489.Creating a New Reservation minute 7:30
+  // This is how we pass the more rich data into the action which is not inside the form, using the bind method
+  // The bind method does on a fn: set the 'this' keyword of that fn and plus, is allows us to pass some additional arguments into the fn.
+  // First argument is the new value of the this keyword
+  // Second argument is the new value
+  // Because we set the first argument is null, so the second argument willl become the first argument of the fn that we are binding, so basically these are getting set by order.
+  const reservationDataAfterBind = createReservationAction.bind(
+    abe,
+    reservationData
+  );
 
   return (
     <div className="scale-[1.01]">
@@ -22,7 +52,15 @@ function ReservationForm({ cabin, user }) {
           <p>{user.name}</p>
         </div>
       </div>
-      <form className="bg-primary-900 py-10 px-16 text-lg flex gap-5 flex-col">
+      <form
+        // action={reservationDataAfterBind}
+        // Because we need to call the resetRange fn which only available on the Client Component, we do some trick here so we can to call the createReservationAction fn and the resetRange fn simultaneously
+        action={async (formdata) => {
+          await reservationDataAfterBind(formdata);
+          resetRange();
+        }}
+        className="bg-primary-900 py-10 px-16 text-lg flex gap-5 flex-col"
+      >
         <div className="space-y-2">
           <label htmlFor="numGuests">How many guests?</label>
           <select
@@ -55,11 +93,13 @@ function ReservationForm({ cabin, user }) {
         </div>
 
         <div className="flex justify-end items-center gap-6">
-          <p className="text-primary-300 text-base">Start by selecting dates</p>
-
-          <button className="bg-accent-500 px-8 py-4 text-primary-800 font-semibold hover:bg-accent-600 transition-all disabled:cursor-not-allowed disabled:bg-gray-500 disabled:text-gray-300">
-            Reserve now
-          </button>
+          {!(startDate && endDate) ? (
+            <p className="text-primary-300 text-base">
+              Start by selecting dates
+            </p>
+          ) : (
+            <SubmitButton pendingLabel="Reserving...">Reserve now</SubmitButton>
+          )}
         </div>
       </form>
     </div>

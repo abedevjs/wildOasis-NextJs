@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { useFormStatus } from "react-dom";
 import { updateGuestAction } from "../_lib/actions";
+import SubmitButton from "./SubmitButton";
 
+// We deliberately make this component as Client Component for learning purpose, so Jonas can shows us how to pass a server component (SelectCountry) as props to a Client Component (UpdateProfileForm). But first this both component is imported by the another Server Component (Profile.page.js)
 function UpdateProfileForm({ guest, children }) {
   const [count, setCount] = useState(0);
   const { fullName, email, nationality, nationalID, countryFlag } = guest;
@@ -43,7 +44,7 @@ function UpdateProfileForm({ guest, children }) {
           />
         </div>
 
-        {/* This here was a Server Component (SelectCountry), but it is wrong. We solve it import the SelectContry component to another server component Profile.page.js who also import the client component UpdateProfileFrom, and pass the SelectCountry as props to UpdateProfileFrom */}
+        {/* This here was a Server Component (SelectCountry), which is wrong because it is imported by the Client Component (UpdateProfileForm). We solve it by import the SelectCountry component to another server component Profile.page.js who also import the client component UpdateProfileFrom, and pass the SelectCountry as props to UpdateProfileFrom */}
         {/* <SelectCountry
           name="nationality"
           id="nationality"
@@ -63,22 +64,9 @@ function UpdateProfileForm({ guest, children }) {
       </div>
 
       <div className="flex justify-end items-center gap-6">
-        <ButtonSubmit />
+        <SubmitButton pendingLabel="Updating...">Update profile</SubmitButton>
       </div>
     </form>
-  );
-}
-
-function ButtonSubmit() {
-  const { pending, data, method, action } = useFormStatus();
-
-  return (
-    <button
-      className="bg-accent-500 px-8 py-4 text-primary-800 font-semibold hover:bg-accent-600 transition-all disabled:cursor-not-allowed disabled:bg-gray-500 disabled:text-gray-300"
-      disabled={pending}
-    >
-      {pending ? "Updating..." : "Update profile"}
-    </button>
   );
 }
 
